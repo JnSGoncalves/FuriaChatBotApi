@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FuriaChatBotApi", "FuriaChatBotApi\FuriaChatBotApi.csproj", "{EFE15185-2F6A-4F75-B1C9-68A3D1A2C125}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EFE15185-2F6A-4F75-B1C9-68A3D1A2C125}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFE15185-2F6A-4F75-B1C9-68A3D1A2C125}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFE15185-2F6A-4F75-B1C9-68A3D1A2C125}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFE15185-2F6A-4F75-B1C9-68A3D1A2C125}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8E32CC0F-0500-4BA9-B22B-AD9B60530B52}
+	EndGlobalSection
+EndGlobal
