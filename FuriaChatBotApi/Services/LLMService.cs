@@ -19,11 +19,14 @@ namespace FuriaChatBotApi.Services {
             _settings = settings.Value;
         }
 
-        public async Task<ChatResponse?> GetResponseAsync(string prompt) {
+        public async Task<string?> GetResponseAsync(string prompt) {
             var body = new {
                 contents = new[] {
                     new {
-                        parts = new[] { new { text = prompt } }
+                            parts = new[]
+                        {
+                            new { text = prompt }
+                        }
                     }
                 }
             };
@@ -36,16 +39,31 @@ namespace FuriaChatBotApi.Services {
 
             var response = await _httpClient.SendAsync(request);
             var json = await response.Content.ReadAsStringAsync();
+
             var root = JsonDocument.Parse(json).RootElement;
 
-            var answer = root
-                .GetProperty("candidates")[0]
-                .GetProperty("content")
-                .GetProperty("parts")[0]
-                .GetProperty("text")
-                .GetString();
+            // Verifica se existe o campo de texto da resposta do Gemini
+            if (root.TryGetProperty("candidates", out var candidates)) {
+                if (candidates.GetArrayLength() > 0) {
+                    var candidate = candidates[0];
+                    if (candidate.TryGetProperty("content", out var content)) {
+                        if (content.TryGetProperty("parts", out var parts)) {
+                            if (parts.GetArrayLength() > 0) {
+                                var part = parts[0];
+                                if (part.TryGetProperty("text", out var text)) {
+                                    return text.GetString();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
-            return answer != null ? new ChatResponse(answer) : null;
+            // Se não encontrou a resposta esperada, loga o JSON (pra debug) e retorna null
+            Console.WriteLine("Resposta inesperada do Gemini:");
+            Console.WriteLine(json);
+
+            return null;
         }
     }
 }

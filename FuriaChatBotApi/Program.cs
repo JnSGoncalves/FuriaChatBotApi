@@ -24,6 +24,8 @@ builder.Services.Configure<GeminiSettings>(options => {
 
 // Serviços da API
 builder.Services.AddHttpClient<ILLMService, LLMService>();
+builder.Services.AddScoped<IChatService, ChatService>();
+
 builder.Services.AddControllers();
 
 var app = builder.Build();

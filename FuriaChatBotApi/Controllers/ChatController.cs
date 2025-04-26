@@ -1,6 +1,5 @@
 ﻿using FuriaChatBotApi.Interface;
 using FuriaChatBotApi.Model;
-using FuriaChatBotApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FuriaChatBotApi.Controllers {
@@ -9,14 +8,14 @@ namespace FuriaChatBotApi.Controllers {
     public class ChatController : ControllerBase {
         private readonly IChatService _chatService;
 
-        public ChatController() {
-            _chatService = new ChatService();
+        public ChatController(IChatService chatService) {
+            _chatService = chatService;
         }
 
         [HttpPost("ask")]
         public async Task<ActionResult<ChatResponse>> Ask([FromBody] ChatRequest request) {
-            //ChatResponse reply = await _chatService.GetResponseAsync(request.Message);
-            return Ok(new ChatResponse($"Resposta de: {request.Message}"));
+            ChatResponse reply = await _chatService.GetResponseAsync(request.Message);
+            return Ok(new ChatResponse($"Resposta de: {reply.Reply}"));
         }
     }
 }

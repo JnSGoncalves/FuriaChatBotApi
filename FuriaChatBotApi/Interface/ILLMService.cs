@@ -2,6 +2,6 @@
 
 namespace FuriaChatBotApi.Interface {
     public interface ILLMService {
-        Task<ChatResponse?> GetResponseAsync(string prompt);
+        Task<string?> GetResponseAsync(string prompt);
     }
 }
