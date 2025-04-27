@@ -1,4 +1,6 @@
 ﻿using System.Net.Http.Headers;
+using FuriaChatBotApi.Model;
+using System.Text.Json;
 
 namespace FuriaChatBotApi.Services {
     public class WitAiService {

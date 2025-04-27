@@ -18,6 +18,7 @@ builder.Services.Configure<GeminiSettings>(options => {
 // Serviços da API
 builder.Services.AddHttpClient<ILLMService, LLMService>();
 builder.Services.AddHttpClient<WitAiService, WitAiService>();
+builder.Services.AddScoped<IIntentProcessingService, IntentProcessingService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 
 builder.Services.AddControllers();
