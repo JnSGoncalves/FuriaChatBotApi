@@ -16,6 +16,11 @@ namespace FuriaChatBotApi.Services {
         }
 
         public string HandleGetElenco(RequestType request) {
+            if (request.Game == "") {
+
+
+            }
+
             return $"Exibindo o elenco do jogo {request.Game}";
         }
 

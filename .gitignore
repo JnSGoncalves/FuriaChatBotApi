@@ -399,3 +399,4 @@ FodyWeavers.xsd
 
 # Variáveis de ambiente
 *.env
+/FuriaChatBotApi/.env
