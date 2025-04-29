@@ -9,10 +9,12 @@ namespace FuriaChatBotApi.Services {
     public class ChatService : IChatService {
         private readonly WitAiService _witAiService;
         private readonly IIntentProcessingService _intentProcessingService;
+        private readonly ICacheService _cacheService;
 
-        public ChatService(WitAiService witAiService, IIntentProcessingService intentProcessingService) {
+        public ChatService(WitAiService witAiService, IIntentProcessingService intentProcessingService, ICacheService cacheService) {
             _witAiService = witAiService;
             _intentProcessingService = intentProcessingService;
+            _cacheService = cacheService;
         }
 
         public async Task<ChatResponse> GetResponseAsync(string sessionId, string message) {
@@ -25,13 +27,25 @@ namespace FuriaChatBotApi.Services {
             Console.WriteLine($"Intent: {request.Intent}");
             Console.WriteLine($"Game: {request.Game}");
             Console.WriteLine($"Match_Count: {request.Match_count}");
-            Console.WriteLine($"Match_type: {request.Match_type}");
-            
-            string info = await _intentProcessingService.ProcessIntent(request);
+            Console.WriteLine($"Match_type: {request.Match_type}\n\n");
 
-            Console.WriteLine(info);
+            ChatResponse info = await _intentProcessingService.ProcessIntent(request);
 
-            return new ChatResponse(sessionId, info, null);
+            if (info.Status != ChatResponse.CodErro.Ok) {
+                return info;
+            }
+
+            SessionContext context = new SessionContext(sessionId);
+            context.CurrentStep = request.Intent;
+            context.LastEntites = new LastEntites {
+                Game = request.Game,
+                Match_count = request.Match_count,
+                Match_type = request.Match_type
+            };
+
+            await _cacheService.SaveContextAsync(sessionId, context);
+
+            return info;
         }
     }
 }

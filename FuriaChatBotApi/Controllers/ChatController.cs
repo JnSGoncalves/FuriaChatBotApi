@@ -40,7 +40,7 @@ namespace FuriaChatBotApi.Controllers {
 
             await _cacheService.SaveContextAsync(sessionId, initialContext);
 
-            return Ok(new ChatResponse(sessionId, _mensagemInicial, _opcoesIniciais));
+            return Ok(new ChatResponse(sessionId, _mensagemInicial, _opcoesIniciais, ChatResponse.CodErro.Ok));
         }
 
         [HttpPost("ask")]
