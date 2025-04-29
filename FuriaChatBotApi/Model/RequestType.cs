@@ -3,35 +3,47 @@ using System.Text.RegularExpressions;
 
 namespace FuriaChatBotApi.Model {
     public class RequestType {
+        public string SessionId { get; set; }
         public string Intent { get; set; }
         public string Game { get; set; }
         public int Match_count { get; set; }
         public string Match_type { get; set; }
 
-        public RequestType(string intent, string game, int match_count, string match_type) {
+        public RequestType(string sessionId, string intent, string game, int match_count, string match_type) {
+            SessionId = sessionId;
             Intent = intent;
             this.Game = game;
             this.Match_count = match_count;
             this.Match_type = match_type;
         }
 
-        public static RequestType GetRequestFromWitJson(string json) {
+        public static RequestType GetRequestFromWitJson(string sessionId, string json) {
             var options = new JsonSerializerOptions {
                 PropertyNameCaseInsensitive = true
             };
 
-            WitAiResponse witResponse = JsonSerializer.Deserialize<WitAiResponse>(json, options);
+            WitAiResponse? witResponse = JsonSerializer.Deserialize<WitAiResponse>(json, options);
 
-            string intent = witResponse.Intents?[0]?.Name ?? "";
-            string game = witResponse.Entities?.Game?[0]?.Value ?? "";
-            string matchCountStr = witResponse.Entities?.MatchCount?[0]?.Value ?? "";
-            string matchTypeStr = witResponse.Entities?.MatchType?[0]?.Value ?? "";
+            if(witResponse == null) {
+                return new RequestType(sessionId,"Error Intent", "", 1, "last");
+            }
+
+            var intentObj = SafeGetFirstOrDefault(witResponse.Intents);
+            var gameObj = SafeGetFirstOrDefault(witResponse.Entities.Game);
+            var matchCountObj = SafeGetFirstOrDefault(witResponse.Entities.MatchCount);
+            var matchTypeObj = SafeGetFirstOrDefault(witResponse.Entities.MatchType);
+
+            string intent = intentObj?.Name ?? "";
+            string game = gameObj?.Value ?? "";
+            string matchCountStr = matchCountObj?.Value ?? "";
+            string matchTypeStr = matchTypeObj?.Value ?? "";
 
             int matchCount = ExtractNumberFromText(matchCountStr);
             string matchType = string.IsNullOrEmpty(matchTypeStr) ? "last" : matchTypeStr;
 
-            return new RequestType(intent, game, matchCount, matchType);
+            return new RequestType(sessionId, intent, game, matchCount, matchType);
         }
+
 
         // Função que extrai o número de uma string, seja por número escrito ou por extenso
         private static int ExtractNumberFromText(string text) {
@@ -51,7 +63,7 @@ namespace FuriaChatBotApi.Model {
                 { "dois", 2 },
                 { "duas", 2 },
                 { "três", 3 },
-                { "tres", 3 }, // sem acento
+                { "tres", 3 },
                 { "quatro", 4 },
                 { "cinco", 5 },
                 { "seis", 6 },
@@ -82,6 +94,10 @@ namespace FuriaChatBotApi.Model {
             }
 
             return 1;
+        }
+
+        private static T? SafeGetFirstOrDefault<T>(List<T> list) where T : class {
+            return (list != null && list.Count > 0) ? list[0] : null;
         }
     }
 }

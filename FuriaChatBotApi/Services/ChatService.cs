@@ -1,43 +1,37 @@
-﻿using FuriaChatBotApi.Interface;
+﻿
 using FuriaChatBotApi.Model;
 
 namespace FuriaChatBotApi.Services {
-    public class ChatService : IChatService{
-        private readonly ILLMService _llmService;
+    public interface IChatService {
+        Task<ChatResponse> GetResponseAsync(string sessionId, string message);
+    }
+
+    public class ChatService : IChatService {
         private readonly WitAiService _witAiService;
         private readonly IIntentProcessingService _intentProcessingService;
 
-        public ChatService(ILLMService llmService, WitAiService witAiService, IIntentProcessingService intentProcessingService) {
-            _llmService = llmService;
+        public ChatService(WitAiService witAiService, IIntentProcessingService intentProcessingService) {
             _witAiService = witAiService;
             _intentProcessingService = intentProcessingService;
         }
 
-        public async Task<ChatResponse> GetResponseAsync(string message) {
+        public async Task<ChatResponse> GetResponseAsync(string sessionId, string message) {
             var witJson = await _witAiService.GetWitResponseAsync(message);
-            //Console.WriteLine(witJson);
+            Console.WriteLine(witJson);
 
-            RequestType request = RequestType.GetRequestFromWitJson(witJson);
- 
+            RequestType request = RequestType.GetRequestFromWitJson(sessionId, witJson);
+
+            Console.WriteLine($"SessionID: {request.SessionId}");
             Console.WriteLine($"Intent: {request.Intent}");
             Console.WriteLine($"Game: {request.Game}");
             Console.WriteLine($"Match_Count: {request.Match_count}");
             Console.WriteLine($"Match_type: {request.Match_type}");
+            
+            string info = await _intentProcessingService.ProcessIntent(request);
 
+            Console.WriteLine(info);
 
-            string prompt = "Interprete um ChatBot que responde sobre o time de E-sports Furia. " +
-                $"Mensagem de contexto enviada pelo usuário: {message}. Dados para a resposta: ";
-            prompt += _intentProcessingService.ProcessIntent(request);
-
-            return new ChatResponse(prompt);
-
-            //string? answer = await _llmService.GetResponseAsync(prompt);
-
-            //if (answer == null) {
-            //    return new ChatResponse("Erro ao carregar resposta.");
-            //}
-
-            //return new ChatResponse(answer);
+            return new ChatResponse(sessionId, info, null);
         }
     }
 }

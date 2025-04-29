@@ -23,8 +23,6 @@ namespace FuriaChatBotApi.Services {
             response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine(responseBody);
-
             return responseBody;
         }
     }

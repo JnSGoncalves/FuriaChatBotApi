@@ -1,6 +1,5 @@
 using DotNetEnv;
 using FuriaChatBotApi.Configs;
-using FuriaChatBotApi.Interface;
 using FuriaChatBotApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +15,10 @@ builder.Services.Configure<GeminiSettings>(options => {
 });
 
 // Serviços da API
-builder.Services.AddHttpClient<ILLMService, LLMService>();
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<WitAiService, WitAiService>();
+builder.Services.AddTransient<PandaScoreService, PandaScoreService>();
+builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 builder.Services.AddScoped<IIntentProcessingService, IntentProcessingService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 
