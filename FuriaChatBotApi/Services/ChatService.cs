@@ -1,5 +1,4 @@
-﻿
-using FuriaChatBotApi.Model;
+﻿using FuriaChatBotApi.Model;
 
 namespace FuriaChatBotApi.Services {
     public interface IChatService {

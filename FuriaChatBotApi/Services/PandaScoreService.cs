@@ -1,14 +1,11 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using FuriaChatBotApi.Model;
 using RestSharp;
-using static System.Net.WebRequestMethods;
 
 namespace FuriaChatBotApi.Services {
     public interface IPandaScoreService {
         Task<List<TeamData>?> GetTeamsByGame(string gameSlug);
-        Task<List<Match>?> GetLastMatches(string teamId, int match_count);
-        Task<string[]> GetNextMatches(string teamId, int match_count);
+        Task<List<Match>?> GetMatches(string game, int match_count, bool isUpcomingSearch = false);
         Task<string[]> ListSupportedGames(string teamId);
     }
     public class PandaScoreService : IPandaScoreService {
@@ -49,7 +46,7 @@ namespace FuriaChatBotApi.Services {
         }
 
 
-        public async Task<List<Match>?> GetLastMatches(string game, int match_count) {
+        public async Task<List<Match>?> GetMatches(string game, int match_count, bool isUpcomingSearch = false) {
             int qtd;
             if (match_count > 1) {
                 qtd = 10;
@@ -57,10 +54,12 @@ namespace FuriaChatBotApi.Services {
                 qtd = 1;
             }
 
+            string setTypeMatch = isUpcomingSearch ? "upcoming" : "past";
+
             Console.WriteLine("Buscando últimas partidas\n");
 
-            var urlByGame = $"https://api.pandascore.co/matches/past?per_page={qtd}&search[slug]=furia&filter[videogame]={game}";
-            var urlDefault = $"https://api.pandascore.co/matches/past?per_page={qtd}&search[slug]=furia";
+            var urlByGame = $"https://api.pandascore.co/matches/{setTypeMatch}?per_page={qtd}&search[slug]=furia&filter[videogame]={game}";
+            var urlDefault = $"https://api.pandascore.co/matches/{setTypeMatch}?per_page={qtd}&search[slug]=furia";
 
             var options = game != null ? new RestClientOptions(urlByGame) : new RestClientOptions(urlDefault);
 
@@ -73,21 +72,14 @@ namespace FuriaChatBotApi.Services {
             var response = await client.GetAsync(request);
 
             string json = response.Content ?? throw new Exception("Resposta nula recebida da API PandaScore");
-            Console.WriteLine("passou pela Exception\n");
 
             var jsonOptions = new JsonSerializerOptions {
                 PropertyNameCaseInsensitive = true
             };
 
-            Console.WriteLine(json);
-
             var matches = JsonSerializer.Deserialize<List<Match>>(json, jsonOptions);
 
             return matches;
-        }
-
-        public Task<string[]> GetNextMatches(string teamId, int match_count) {
-            throw new NotImplementedException();
         }
 
         public Task<string[]> ListSupportedGames(string teamId) {

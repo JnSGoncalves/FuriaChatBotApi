@@ -1,7 +1,5 @@
-﻿using System;
-using FuriaChatBotApi.Model;
+﻿using FuriaChatBotApi.Model;
 using FuriaChatBotApi.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FuriaChatBotApi.Controllers {

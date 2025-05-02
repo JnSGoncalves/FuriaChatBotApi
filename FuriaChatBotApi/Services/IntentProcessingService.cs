@@ -7,7 +7,7 @@ namespace FuriaChatBotApi.Services {
         Task<ChatResponse> ProcessIntent(RequestType request);
         Task<ChatResponse> HandleGetElenco(RequestType request, SessionContext context);
         Task<ChatResponse> HandleGetLastMatches(RequestType request, SessionContext context);
-        ChatResponse HandleGetNextMatch(RequestType request, SessionContext context);
+        Task<ChatResponse> HandleGetNextMatch(RequestType request, SessionContext context);
         ChatResponse HandleListSupportedGames(RequestType request, SessionContext context);
         ChatResponse HandleUnknownIntent(RequestType request, SessionContext context);
     }
@@ -111,7 +111,7 @@ namespace FuriaChatBotApi.Services {
             string msg = "";
             List<string>? sugestedOptions = null;
 
-            List<Match>? matches = await _pandaScoreService.GetLastMatches(request.Game, request.Match_count);
+            List<Match>? matches = await _pandaScoreService.GetMatches(request.Game, request.Match_count);
 
             if (matches != null && matches.Any()) {
                 msg += "Tá na mão!\n";
@@ -147,8 +147,50 @@ namespace FuriaChatBotApi.Services {
             return new ChatResponse(request.SessionId, msg, sugestedOptions, ChatResponse.CodErro.Ok);
         }
 
-        public ChatResponse HandleGetNextMatch(RequestType request, SessionContext context) {
-            throw new NotImplementedException();
+        public async Task<ChatResponse> HandleGetNextMatch(RequestType request, SessionContext context) {
+            string msg = "";
+            List<string>? sugestedOptions = null;
+
+            List<Match>? matches = await _pandaScoreService.GetMatches(request.Game, request.Match_count, true);
+
+            if (matches != null && matches.Any()) {
+                msg += "Tá na mão!\n";
+
+                if (string.IsNullOrEmpty(request.Game)) {
+                    if (request.Match_count == 0 || request.Match_count == 1) {
+                        msg += $"A próxima partida disputada pela FURIA será:\n";
+                    } else {
+                        msg += $"Essas são as próximas partidas que FURIA irá participar:\n";
+                    }
+                } else {
+                    if (request.Match_count == 0 || request.Match_count == 1) {
+                        msg += $"A próxima partida disputada pela FURIA no {request.Game} será:\n";
+                    } else {
+                        msg += $"Essas são as próximas partidas que FURIA irá participar no {request.Game}:\n";
+                    }
+                }
+
+                msg += FormatStringMatches(matches);
+
+            } else {
+                if (string.IsNullOrEmpty(request.Game))
+                    msg = "Infelizmente, não encontrei nenhuma partida agendada com os times FURIA :(\n" +
+                        "Mas não se preocupe que, caso me peça mais tarde, eu posso realizar outra busca pra você!";
+                else
+                    msg += $"Infelizmente, não encontrei nenhuma partida de {request.Game} agendada com os times FURIA :(\n" +
+                        "Mas não se preocupe que, caso me peça mais tarde, eu posso realizar outra busca pra você!";
+            }
+
+            msg += "Gostaria de saber mais alguma coisa sobre a FURIA ou saber quais as últimas partidas de um jogo específico?" +
+            " É só perguntar!";
+
+            sugestedOptions = new List<string>{
+                    "Quais os times da FURIA no Valorant?",
+                    "Quais as últimas partidas que a FURIA participou?",
+                    "Quais jogos a FURIA atua?"
+                };
+
+            return new ChatResponse(request.SessionId, msg, sugestedOptions, ChatResponse.CodErro.Ok);
         }
 
         public ChatResponse HandleListSupportedGames(RequestType request, SessionContext context) {
@@ -172,26 +214,28 @@ namespace FuriaChatBotApi.Services {
             return new ChatResponse(request.SessionId, msg, sugestedOptions, ChatResponse.CodErro.Invalid);
         }
 
-
-        private string FormatStringMatches(List<Match> matches) {
+        private string FormatStringMatches(List<Match> matches, bool isNextMatches = false) {
             string msg = "\n";
 
             foreach (Match match in matches) {
                 msg +=
                     $" - {match.Name} pela {match.League.Name}\n" +
-                    $"Onde {match.Opponents.First().Opponent.Name} e {match.Opponents[1].Opponent.Name} se enfrentaram!\n";
+                    $"Onde {match.Opponents.First().Opponent.Name} e {match.Opponents[1].Opponent.Name} se ";
+                msg += isNextMatches ? "enfrentarão!" : $"enfrentaram!\n";
 
-                if (match.Winner.Slug.Contains("furia")) {
-                    msg += $"Nessa partida {match.Winner.Name} saiu com a vitória! Ganhando por ";
-                } else {
-                    msg += $"Infelizmente perdemos para o time {match.Winner.Name}, que foi um ótimo oponente! " +
-                        $"Levando a vitória por ";
-                }
+                if (!isNextMatches) {
+                    if (match.Winner.Slug.Contains("furia")) {
+                        msg += $"Nessa partida {match.Winner.Name} saiu com a vitória! Ganhando por ";
+                    } else {
+                        msg += $"Infelizmente perdemos para o time {match.Winner.Name}, que foi um ótimo oponente! " +
+                            $"Levando a vitória por ";
+                    }
 
-                if (match.Results.First().TeamId == match.Winner.Id) {
-                    msg += $"{match.Results.First().Score} a {match.Results[1].Score}\n";
-                } else {
-                    msg += $"{match.Results[1].Score} a {match.Results.First().Score}\n";
+                    if (match.Results.First().TeamId == match.Winner.Id) {
+                        msg += $"{match.Results.First().Score} a {match.Results[1].Score}\n";
+                    } else {
+                        msg += $"{match.Results[1].Score} a {match.Results.First().Score}\n";
+                    }
                 }
 
                 msg += $"\n";
