@@ -5,6 +5,7 @@ namespace FuriaChatBotApi.Services {
     public interface ICacheService {
         Task<SessionContext> GetOrCreateContextAsync(string sessionId);
         Task SaveContextAsync(string sessionId, SessionContext context);
+        Task<bool> IsSessionValidAsync(string sessionId);
     }
 
     public class MemoryCacheService : ICacheService {
@@ -24,6 +25,11 @@ namespace FuriaChatBotApi.Services {
         public Task SaveContextAsync(string sessionId, SessionContext context) {
             _cache.Set(sessionId, context, TimeSpan.FromMinutes(30));
             return Task.CompletedTask;
+        }
+
+        public Task<bool> IsSessionValidAsync(string sessionId) {
+            var exists = _cache.TryGetValue<SessionContext>(sessionId, out _);
+            return Task.FromResult(exists);
         }
     }
 }

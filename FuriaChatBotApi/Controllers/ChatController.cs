@@ -1,5 +1,4 @@
-﻿using System;
-using FuriaChatBotApi.Model;
+﻿using FuriaChatBotApi.Model;
 using FuriaChatBotApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,13 +39,20 @@ namespace FuriaChatBotApi.Controllers {
 
             await _cacheService.SaveContextAsync(sessionId, initialContext);
 
-            return Ok(new ChatResponse(sessionId, _mensagemInicial, _opcoesIniciais));
+            return Ok(new ChatResponse(sessionId, _mensagemInicial, _opcoesIniciais, ChatResponse.CodErro.Ok));
         }
 
         [HttpPost("ask")]
         public async Task<ActionResult<ChatResponse>> Ask([FromBody] ChatRequest request) {
-            ChatResponse reply = await _chatService.GetResponseAsync(request.SessionId, request.Message);
-            return Ok(reply);
+            bool isValid = await _cacheService.IsSessionValidAsync(request.SessionId);
+
+            ChatResponse reply;
+            if (isValid) {
+                reply = await _chatService.GetResponseAsync(request.SessionId, request.Message);
+                return Ok(reply);
+            } else {
+                return await GetSession();
+            }
         }
     }
 }
