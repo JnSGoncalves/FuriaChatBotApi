@@ -50,7 +50,7 @@ namespace FuriaChatBotApi.Model {
             if (string.IsNullOrEmpty(text))
                 return 0;
 
-            Match match = Regex.Match(text, @"\d+");
+            System.Text.RegularExpressions.Match match = Regex.Match(text, @"\d+");
             if (match.Success && int.TryParse(match.Value, out int number)) {
                 return number;
             }
