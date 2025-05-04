@@ -1,0 +1,1 @@
+﻿window.blazorHelpers = { scrollToBottom: el => el.scrollTop = el.scrollHeight };

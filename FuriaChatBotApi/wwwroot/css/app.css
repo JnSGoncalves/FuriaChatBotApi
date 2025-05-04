@@ -1,0 +1,88 @@
+﻿.chat-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    background: #f7f7f8;
+}
+
+.message {
+    max-width: 70%;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    word-wrap: break-word;
+}
+
+    .message.user {
+        background: #007bff;
+        color: #fff;
+        align-self: flex-end;
+    }
+
+    .message.bot {
+        background: #e5e5ea;
+        color: #000;
+        align-self: flex-start;
+    }
+
+.suggestions {
+    padding: 0.5rem 1rem;
+    background: #fff;
+    border-top: 1px solid #ddd;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.suggestion-btn {
+    padding: 0.5rem 1rem;
+    background: #ddd;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+}
+
+    .suggestion-btn:hover {
+        background: #ccc;
+    }
+
+.input-area {
+    display: flex;
+    padding: 0.5rem;
+    border-top: 1px solid #ddd;
+    background: #fff;
+}
+
+    .input-area input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        outline: none;
+    }
+
+    .input-area button {
+        margin-left: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 20px;
+        background: #007bff;
+        color: #fff;
+        cursor: pointer;
+    }
+
+        .input-area button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }

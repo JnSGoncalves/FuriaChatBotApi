@@ -1,22 +1,21 @@
 using DotNetEnv;
 using FuriaChatBotApi.Configs;
 using FuriaChatBotApi.Services;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-// Carrega variáveis do .env
+// Carrega .env somente no dev
 if (builder.Environment.IsDevelopment()) {
     Env.Load();
 }
 
-builder.Services.Configure<GeminiSettings>(options => {
-    options.ApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
-    options.Endpoint = Environment.GetEnvironmentVariable("GEMINI_API_ENDPOINT");
-});
+// Documentação Swagger para a API
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-// Serviços da API
+// Serviços de cache, HTTP e seus próprios
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<WitAiService, WitAiService>();
 builder.Services.AddTransient<PandaScoreService, PandaScoreService>();
@@ -24,23 +23,42 @@ builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 builder.Services.AddScoped<IIntentProcessingService, IntentProcessingService>();
 builder.Services.AddScoped<IChatService, ChatService>();
 
+// Serviços da API
 builder.Services.AddControllers();
+
+// Serviços Blazor Server
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Pipeline
+
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 } else {
-    app.UseCors(builder =>
-    builder.AllowAnyOrigin()
-           .AllowAnyMethod()
-           .AllowAnyHeader());
+    app.UseCors(policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+    );
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
+
+app.UseRouting();
+
 app.UseAuthorization();
+
+// Endpoints da API
 app.MapControllers();
+
+app.MapBlazorHub();
+app.MapFallbackToPage("/_Host");
 
 app.Run();

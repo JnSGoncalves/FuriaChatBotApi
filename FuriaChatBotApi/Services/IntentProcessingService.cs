@@ -1,4 +1,5 @@
-﻿using FuriaChatBotApi.Model;
+﻿using FuriaChatBotApi.Helpers;
+using FuriaChatBotApi.Model;
 using System.Reflection;
 using System.Text.Json;
 
@@ -8,7 +9,7 @@ namespace FuriaChatBotApi.Services {
         Task<ChatResponse> HandleGetElenco(RequestType request, SessionContext context);
         Task<ChatResponse> HandleGetLastMatches(RequestType request, SessionContext context);
         Task<ChatResponse> HandleGetNextMatch(RequestType request, SessionContext context);
-        ChatResponse HandleListSupportedGames(RequestType request, SessionContext context);
+        Task<ChatResponse> HandleListSupportedGames(RequestType request, SessionContext context);
         ChatResponse HandleUnknownIntent(RequestType request, SessionContext context);
     }
 
@@ -24,9 +25,7 @@ namespace FuriaChatBotApi.Services {
         public async Task<ChatResponse> ProcessIntent(RequestType request) {
             SessionContext context = await _cacheService.GetOrCreateContextAsync(request.SessionId);
 
-            if (string.IsNullOrEmpty(request.Intent) || 
-                        request.Intent == "Confirm" || 
-                        request.Intent == "Cancel") {
+            if (request.Intent == "Confirm" || request.Intent == "Cancel") {
                 request.Intent = context.CurrentStep;
             }
 
@@ -70,7 +69,7 @@ namespace FuriaChatBotApi.Services {
             List<string>? sugestedOptions = null;
             
             if (!string.IsNullOrEmpty(request.Game)) {
-                List<TeamData>? teamData = await _pandaScoreService.GetTeamsByGame(request.Game);
+                List<TeamData>? teamData = await _pandaScoreService.GetTeams(request.Game);
 
                 msg = "";
                 if (teamData != null && teamData.Any()) {
@@ -170,7 +169,7 @@ namespace FuriaChatBotApi.Services {
                     }
                 }
 
-                msg += FormatStringMatches(matches);
+                msg += FormatStringMatches(matches, true);
 
             } else {
                 if (string.IsNullOrEmpty(request.Game))
@@ -193,8 +192,36 @@ namespace FuriaChatBotApi.Services {
             return new ChatResponse(request.SessionId, msg, sugestedOptions, ChatResponse.CodErro.Ok);
         }
 
-        public ChatResponse HandleListSupportedGames(RequestType request, SessionContext context) {
-            throw new NotImplementedException();
+        public async Task<ChatResponse> HandleListSupportedGames(RequestType request, SessionContext context) {
+            string msg = "";
+            List<string>? sugestedOptions = new List<string>{
+                    "Quais os times da FURIA no Valorant?",
+                    "Quais as últimas 3 partidas que a FURIA jogou?",
+                    "Qual a próxima partida de Valorant da FURIA?"
+                };
+
+            List<TeamData>? teams = await _pandaScoreService.GetTeams(null);
+
+            if(teams == null) {
+                msg += "Infelizmente, não consegui realizar a encontrar os dados sobre a FURIA :(";
+                return new ChatResponse(request.SessionId, msg, sugestedOptions, ChatResponse.CodErro.InternalError);
+            }
+
+            List<string> jogos = new List<string>();
+
+            foreach (var team in teams) {
+                if (!jogos.Contains(team.CurrentVideogame.Name)) {
+                    jogos.Add(team.CurrentVideogame.Name);
+                }
+            }
+
+            msg += $"Atualmente a FURIA atua no cenário de E-Sports nos seguintes jogos:\n\n";
+            
+            foreach (var item in jogos) {
+                msg += $" - {item}\n";
+            }
+
+            return new ChatResponse(request.SessionId, msg, sugestedOptions, ChatResponse.CodErro.Ok);
         }
 
         public ChatResponse HandleUnknownIntent(RequestType request, SessionContext context) {
@@ -223,7 +250,7 @@ namespace FuriaChatBotApi.Services {
                     $"Onde {match.Opponents.First().Opponent.Name} e {match.Opponents[1].Opponent.Name} se ";
                 msg += isNextMatches ? "enfrentarão!" : $"enfrentaram!\n";
 
-                if (!isNextMatches) {
+                if (!isNextMatches && match.Winner != null) {
                     if (match.Winner.Slug.Contains("furia")) {
                         msg += $"Nessa partida {match.Winner.Name} saiu com a vitória! Ganhando por ";
                     } else {
@@ -236,6 +263,10 @@ namespace FuriaChatBotApi.Services {
                     } else {
                         msg += $"{match.Results[1].Score} a {match.Results.First().Score}\n";
                     }
+
+                    msg += $"A partida ocorreu {DateTimeHelpers.FormatBrasiliaTime(match.BeginAt)}.\n";
+                } else {
+                    msg += $"A partida ocorrerá {DateTimeHelpers.FormatBrasiliaTime(match.BeginAt)}.";
                 }
 
                 msg += $"\n";
