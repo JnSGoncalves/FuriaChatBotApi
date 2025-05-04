@@ -1,0 +1,108 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using FuriaChatBotApi.Model
+@using Microsoft.JSInterop
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<link href="css/app.css" rel="stylesheet" />
+
+<div class="chat-container">
+    <div class="messages" @ref="messagesDiv">
+        @foreach (var msg in ChatHistory) {
+            <div class="message @(msg.IsUser ? "user" : "bot")">
+                @((MarkupString)msg.Text.Replace("\n", "<br/>"))
+            </div>
+        }
+    </div>
+
+    @if (Suggestions != null && Suggestions.Any()) {
+        <div class="suggestions">
+            @foreach (var suggestion in Suggestions) {
+                <button class="suggestion-btn" @onclick="() => SelectSuggestion(suggestion)">@suggestion</button>
+            }
+        </div>
+    }
+
+    <div class="input-area">
+        <input @bind="CurrentInput" @bind:event="oninput" @onkeydown="HandleKeyDown" placeholder="Digite sua mensagem..." />
+        <button @onclick="SendMessage" disabled="@(string.IsNullOrWhiteSpace(CurrentInput))">Enviar</button>
+    </div>
+</div>
+
+@code {
+    private ElementReference messagesDiv;
+    private string CurrentInput = string.Empty;
+    private List<ChatMessage> ChatHistory = new();
+    private List<string> Suggestions = new();
+    private string SessionId = string.Empty;
+
+    protected override async Task OnInitializedAsync() {
+        try {
+            var response = await Http.GetAsync(NavigationManager.BaseUri + "api/Chat/getSession");
+            if (response.IsSuccessStatusCode) {
+                var result = await response.Content.ReadFromJsonAsync<ChatResponse>();
+                SessionId = result?.SessionId;
+                ChatHistory.Add(new ChatMessage { Text = result?.Reply ?? string.Empty, IsUser = false });
+                Suggestions = result?.SugestedOptions ?? new List<string>();
+            } else {
+                ChatHistory.Add(new ChatMessage { Text = "Erro ao iniciar a sessão com a API.", IsUser = false });
+            }
+        } catch (Exception ex) {
+            ChatHistory.Add(new ChatMessage { Text = $"Erro: {ex.Message}", IsUser = false });
+        }
+
+        await Task.Delay(50);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        await JS.InvokeVoidAsync("blazorHelpers.scrollToBottom", messagesDiv);
+    }
+
+    private async Task SendMessage() {
+        var userMsg = CurrentInput.Trim();
+        if (string.IsNullOrEmpty(userMsg))
+            return;
+
+        ChatHistory.Add(new ChatMessage { Text = userMsg, IsUser = true });
+        CurrentInput = string.Empty;
+        Suggestions.Clear();
+        StateHasChanged();
+
+        try {
+            var chatRequest = new ChatRequest(SessionId, userMsg);
+            var response = await Http.PostAsJsonAsync(NavigationManager.BaseUri + "api/Chat/ask", chatRequest);
+            if (response.IsSuccessStatusCode) {
+                var result = await response.Content.ReadFromJsonAsync<ChatResponse>();
+                SessionId = result?.SessionId ?? SessionId;
+                ChatHistory.Add(new ChatMessage { Text = result?.Reply ?? string.Empty, IsUser = false });
+                Suggestions = result?.SugestedOptions ?? new List<string>();
+            } else {
+                ChatHistory.Add(new ChatMessage { Text = "Erro ao conectar com a API.", IsUser = false });
+            }
+        } catch (Exception ex) {
+            ChatHistory.Add(new ChatMessage { Text = $"Erro: {ex.Message}", IsUser = false });
+        }
+
+        await JS.InvokeVoidAsync("blazorHelpers.scrollToBottom", messagesDiv);
+        StateHasChanged();
+    }
+
+    private async Task SelectSuggestion(string suggestion) {
+        CurrentInput = suggestion;
+        await SendMessage();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e) {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(CurrentInput)) {
+            await SendMessage();
+        }
+    }
+
+    public class ChatMessage {
+        public string Text { get; set; } = string.Empty;
+        public bool IsUser { get; set; }
+    }
+}

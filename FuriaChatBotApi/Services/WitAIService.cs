@@ -10,7 +10,12 @@ namespace FuriaChatBotApi.Services {
         public WitAiService(HttpClient httpClient) {
             _httpClient = httpClient;
 
-            DotNetEnv.Env.Load();
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            if (environment != "Production") {
+                DotNetEnv.Env.Load();
+            }
+
             _witToken = Environment.GetEnvironmentVariable("WIT_AI_TOKEN");
 
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _witToken);
