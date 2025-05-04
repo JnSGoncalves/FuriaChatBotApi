@@ -23,6 +23,9 @@ namespace FuriaChatBotApi.Model {
         public string Name { get; set; }
     }
 
+    /// <summary>
+    /// Modelo de resposta do Wit.ai
+    /// </summary>
     public class WitAiResponse {
         [JsonPropertyName("entities")]
         public WitEntities Entities { get; set; }

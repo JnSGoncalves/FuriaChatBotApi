@@ -26,6 +26,12 @@ namespace FuriaChatBotApi.Controllers {
             _cacheService = memoryCache;
         }
 
+        /// <summary>
+        /// Rota para obtenção de um Id de sessão da API
+        /// </summary>
+        /// <returns>
+        /// Modelo de resposta com a mensagem inicial padrão e o id da sessão criada
+        /// </returns>
         [HttpGet("getSession")]
         public async Task<ActionResult<ChatResponse>> GetSession() {
             var sessionId = Guid.NewGuid().ToString();
@@ -42,6 +48,13 @@ namespace FuriaChatBotApi.Controllers {
             return Ok(new ChatResponse(sessionId, _mensagemInicial, _opcoesIniciais, ChatResponse.CodErro.Ok));
         }
 
+        /// <summary>
+        /// Rota de obtenção da resposta do ChatBot através da requisição do usuário
+        /// </summary>
+        /// <param name="request">Requisição com id da sessão e pergunta do usuário</param>
+        /// <returns>
+        /// Modelo de resposta com base na requisição
+        /// </returns>
         [HttpPost("ask")]
         public async Task<ActionResult<ChatResponse>> Ask([FromBody] ChatRequest request) {
             bool isValid = await _cacheService.IsSessionValidAsync(request.SessionId);

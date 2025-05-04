@@ -1,9 +1,12 @@
 ﻿namespace FuriaChatBotApi.Model {
+    /// <summary>
+    /// Modelo de resposta da API
+    /// </summary>
     public class ChatResponse {
         public enum CodErro {
-            Ok,        // Operação bem-sucedida
-            NotImplemented, // Intenção não implementada
-            Invalid,         // Intenção inválida ou desconhecida
+            Ok,        /// Operação bem-sucedida
+            NotImplemented, /// Intenção não implementada
+            Invalid,         /// Intenção inválida ou desconhecida
             InternalError
         }
 

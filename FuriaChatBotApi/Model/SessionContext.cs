@@ -1,4 +1,7 @@
 ﻿namespace FuriaChatBotApi.Model {
+    /// <summary>
+    ///  Contexto de cada Sessão na API
+    /// </summary>
     public class SessionContext {
         public string SessionId { get; set; }
         public string CurrentStep { get; set; }

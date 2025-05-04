@@ -3,10 +3,25 @@ using FuriaChatBotApi.Model;
 using RestSharp;
 
 namespace FuriaChatBotApi.Services {
+    /// <summary>
+    /// Serviço responsável pelas consultas na API do Panda Score
+    /// </summary>
     public interface IPandaScoreService {
+        /// <summary>
+        /// Obtenção dos times da FURIA, com base ou não no jogo passado como parâmetro
+        /// </summary>
+        /// <param name="gameSlug">Slug do Jogo na PandaScore API | Null lista todos os times da FURIA cadastrados</param>
+        /// <returns>Lista dos Times encontrados</returns>
         Task<List<TeamData>?> GetTeams(string gameSlug = null);
+        /// <summary>
+        /// Obtenção das partidas passadas ou que estão agêndadas dos times da FURIA
+        /// Baseada no jogo passado como parâmetro (Se o game for nulo, obtém todas as partidas)
+        /// </summary>
+        /// <param name="game">Slug do jogo na Panda Score API | Se nulo a pesquisa será geral</param>
+        /// <param name="match_count">Quantidade de partidas para pesquisa | 0 é considerado como 1</param>
+        /// <param name="isUpcomingSearch">True = Próximas partidas | False = Partidas passadas</param>
+        /// <returns></returns>
         Task<List<Match>?> GetMatches(string game, int match_count, bool isUpcomingSearch = false);
-        Task<string[]> ListSupportedGames(string teamId);
     }
     public class PandaScoreService : IPandaScoreService {
         private readonly string _pandaScore_Token;
@@ -86,10 +101,6 @@ namespace FuriaChatBotApi.Services {
             var matches = JsonSerializer.Deserialize<List<Match>>(json, jsonOptions);
 
             return matches;
-        }
-
-        public Task<string[]> ListSupportedGames(string teamId) {
-            throw new NotImplementedException();
         }
     }
 }
