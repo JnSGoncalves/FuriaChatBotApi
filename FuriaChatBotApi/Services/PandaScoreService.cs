@@ -12,7 +12,12 @@ namespace FuriaChatBotApi.Services {
         private readonly string _pandaScore_Token;
 
         public PandaScoreService() {
-            DotNetEnv.Env.Load();
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            if (environment != "Production") {
+                DotNetEnv.Env.Load();
+            }
+
             _pandaScore_Token = Environment.GetEnvironmentVariable("PANDA_SCORE_TOKEN");
         }
 

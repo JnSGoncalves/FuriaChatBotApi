@@ -7,7 +7,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Carrega variáveis do .env
-Env.Load();
+if (builder.Environment.IsDevelopment()) {
+    Env.Load();
+}
 
 builder.Services.Configure<GeminiSettings>(options => {
     options.ApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
@@ -27,16 +29,18 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
+} else {
+    app.UseCors(builder =>
+    builder.AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader());
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
