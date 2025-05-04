@@ -5,11 +5,47 @@ using System.Text.Json;
 
 namespace FuriaChatBotApi.Services {
     public interface IIntentProcessingService {
+        /// <summary>
+        /// Função de reconhecimento e realocação da requisição para o Handle específico
+        /// </summary>
+        /// <param name="request">Requisição do usuário</param>
+        /// <returns>Resposta formalizada para retorno</returns>
         Task<ChatResponse> ProcessIntent(RequestType request);
+
+        /// <summary>
+        /// Função de formalização da resposta com base na intenção GetElenco
+        /// </summary>
+        /// <param name="request">Requisição do usuário</param>
+        /// <param name="context">Contexto anterior da sessão</param>
+        /// <returns>Resposta formalizada para retorno</returns>
         Task<ChatResponse> HandleGetElenco(RequestType request, SessionContext context);
+        /// <summary>
+        /// Função de formalização da resposta com base na intenção GetLastMatches
+        /// </summary>
+        /// <param name="request">Requisição do usuário</param>
+        /// <param name="context">Contexto anterior da sessão</param>
+        /// <returns>Resposta formalizada para retorno</returns>
         Task<ChatResponse> HandleGetLastMatches(RequestType request, SessionContext context);
+        /// <summary>
+        /// Função de formalização da resposta com base na intenção GetNextMatches
+        /// </summary>
+        /// <param name="request">Requisição do usuário</param>
+        /// <param name="context">Contexto anterior da sessão</param>
+        /// <returns>Resposta formalizada para retorno</returns>
         Task<ChatResponse> HandleGetNextMatch(RequestType request, SessionContext context);
+        /// <summary>
+        /// Função de formalização da resposta com base na intenção ListSupportedGames
+        /// </summary>
+        /// <param name="request">Requisição do usuário</param>
+        /// <param name="context">Contexto anterior da sessão</param>
+        /// <returns>Resposta formalizada para retorno</returns>
         Task<ChatResponse> HandleListSupportedGames(RequestType request, SessionContext context);
+        /// <summary>
+        /// Função de formalização da resposta com base em uma intenção desconhecida
+        /// </summary>
+        /// <param name="request">Requisição do usuário</param>
+        /// <param name="context">Contexto anterior da sessão</param>
+        /// <returns>Resposta formalizada para retorno de uma intenção não cadastrada</returns>
         ChatResponse HandleUnknownIntent(RequestType request, SessionContext context);
     }
 

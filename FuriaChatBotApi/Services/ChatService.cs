@@ -1,7 +1,16 @@
 ﻿using FuriaChatBotApi.Model;
 
 namespace FuriaChatBotApi.Services {
+    /// <summary>
+    /// Serviço de interpretação do Chat
+    /// </summary>
     public interface IChatService {
+        /// <summary>
+        /// Método de obtenção da resposta da API para retorno
+        /// </summary>
+        /// <param name="sessionId">Id da sessão</param>
+        /// <param name="message">Mensagem enviada pelo usuário</param>
+        /// <returns>Retorno do modelo de resposta formalizado</returns>
         Task<ChatResponse> GetResponseAsync(string sessionId, string message);
     }
 

@@ -2,6 +2,9 @@
 using System.Text.RegularExpressions;
 
 namespace FuriaChatBotApi.Model {
+    /// <summary>
+    /// Modelo de requisição para ser utilizada de base pelo código
+    /// </summary>
     public class RequestType {
         public string SessionId { get; set; }
         public string Intent { get; set; }
@@ -17,6 +20,13 @@ namespace FuriaChatBotApi.Model {
             this.Match_type = match_type;
         }
 
+
+        /// <summary>
+        /// Fabrica do modelo de Request com base no json de retorno do modelo NLP do Wit.ai
+        /// </summary>
+        /// <param name="sessionId">Id da sessão.</param>
+        /// <param name="json">Json de retorno do Wit.ai como string.</param>
+        /// <returns>RequestType formalizado.</returns>
         public static RequestType GetRequestFromWitJson(string sessionId, string json) {
             var options = new JsonSerializerOptions {
                 PropertyNameCaseInsensitive = true
@@ -44,8 +54,10 @@ namespace FuriaChatBotApi.Model {
             return new RequestType(sessionId, intent, game, matchCount, matchType);
         }
 
-
-        // Função que extrai o número de uma string, seja por número escrito ou por extenso
+        /// <summary>
+        /// Função que extrai o número de uma string, seja por número escrito ou por extenso
+        /// </summary>
+        /// <param name="text">string para coleta do número.</param>
         private static int ExtractNumberFromText(string text) {
             if (string.IsNullOrEmpty(text))
                 return 0;

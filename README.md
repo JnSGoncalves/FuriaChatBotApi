@@ -157,3 +157,7 @@ Código de status da requisição enviada pela API:
 ## 📝 Licença
 
 Esse projeto está sob licença MIT. Veja o arquivo [LICENÇA](LICENSE.md) para mais detalhes.
+
+## Considerações Finais
+
+Atualmente essa API se encontra em uma versão beta inicial. Apesar disso, possui grande potencial de escalabilidade para aplicações maiores. Tendo em vista que, atualmente, já conta com uma capacidade considerável de interpretação das intenções do usuário, mas ainda requer aprimoramentos — tanto no treinamento do modelo NLP utilizado quanto na ampliação das funcionalidades disponíveis. Acredito que com maior tempo de desenvolvimento, esse projeto tem uma grande capacidade de se tornar um produto viável para utilização geral.

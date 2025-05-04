@@ -2,9 +2,28 @@
 using Microsoft.Extensions.Caching.Memory;
 
 namespace FuriaChatBotApi.Services {
+    /// <summary>
+    /// Serviço responsavem pelo gerenciamento do cache das sessões
+    /// </summary>
     public interface ICacheService {
+        /// <summary>
+        /// Método de obtenção ou criação de um contexto de sessão na memória cache
+        /// </summary>
+        /// <param name="sessionId">Id da sessão</param>
+        /// <returns>Contexto de sessão</returns>
         Task<SessionContext> GetOrCreateContextAsync(string sessionId);
+        /// <summary>
+        /// Salva as alteração de um contexto de sessão
+        /// </summary>
+        /// <param name="sessionId">Id da sessão</param>
+        /// <param name="context">Contexto da sessão</param>
+        /// <returns>Contexto de sessão passado como parametro</returns>
         Task SaveContextAsync(string sessionId, SessionContext context);
+        /// <summary>
+        /// Método de validação do de um Id de Sessão
+        /// </summary>
+        /// <param name="sessionId">Id da sessão</param>
+        /// <returns>True = Id válido | False = Id inválido</returns>
         Task<bool> IsSessionValidAsync(string sessionId);
     }
 

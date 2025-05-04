@@ -1,6 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace FuriaChatBotApi.Model {
+    /// <summary>
+    /// Modelo de dados de cada time retornado pela API do Panda Score
+    /// </summary>
     public class TeamData {
         [JsonPropertyName("id")]
         public int Id { get; set; }

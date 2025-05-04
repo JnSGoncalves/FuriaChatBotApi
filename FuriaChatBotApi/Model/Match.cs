@@ -1,6 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace FuriaChatBotApi.Model {
+    /// <summary>
+    /// Modelo de Partidas obtidas pela API do Panda Score
+    /// </summary>
     public class Match {
         [JsonPropertyName("draw")]
         public bool? Draw { get; set; }
